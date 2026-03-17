@@ -3,28 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Inmobiliaria Pro</title>
+    <title>Simulador inmuebles pro </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-		/* 1. Esta línea fuerza que el texto y la caja estén en la misma fila y el número a la derecha */
-		.input-group { 
-			display: flex !important; 
-			justify-content: space-between !important; 
-			align-items: center !important; 
-			margin-bottom: 0.5rem; 
-			border-bottom: 1px solid #f8fafc;
-		}
+        .input-group { 
+            display: flex !important; 
+            justify-content: space-between !important; 
+            align-items: center !important; 
+            margin-bottom: 0.5rem; 
+            border-bottom: 1px solid #f8fafc;
+        }
 
-		/* 2. Esta línea reduce el tamaño (w-20) y centra el texto (text-center) */
-		input { 
-			width: 5rem !important; /* Aproximadamente 80px, esto lo hace pequeño */
-			text-align: center !important; /* Centra el número dentro de la caja */
-			background-color: #f9fafb;
-			border: 1px solid #d1d5db;
-			border-radius: 0.5rem;
-			padding: 0.25rem;
-		}
+        /* Contenedor para el símbolo € dentro del input */
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-wrapper::after {
+            content: "€";
+            position: absolute;
+            right: 8px;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        /* Clase especial para quitar el € en el porcentaje */
+        .no-euro::after { content: "" !important; }
+
+        input { 
+            width: 6rem !important; 
+            text-align: center !important; 
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.25rem 1.2rem 0.25rem 0.25rem; /* Espacio extra a la derecha para el € */
+        }
+        
+        /* Estilo para el título más grande */
+        #nombreInmueble {
+            width: 800px !important; /* Caja mucho más grande */
+            max-width: 100%;
+            text-align: left !important;
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+        }
+
         .metric-card { @apply p-6 rounded-2xl border border-gray-100 shadow-sm bg-white border-l-8; }
         .bad { @apply text-red-600 font-bold; }
         .good { @apply text-green-600 font-bold; }
@@ -36,12 +61,8 @@
     <div id="capture-area" class="max-w-6xl mx-auto">
         <header class="mb-8 flex justify-between items-center">
             <div class="text-left">
-                <input type="text" id="nombreInmueble" value="Av. desconocida" class="text-3xl font-extrabold text-blue-600 bg-transparent border-none w-[600px] p-0 focus:ring-0 text-left">
+                <input type="text" id="nombreInmueble" value="Av. desconocida" class="text-4xl font-extrabold text-blue-600 focus:ring-0">
                 <p class="text-slate-500 italic">Simulador inmuebles</p>
-            </div>
-            <div class="flex gap-2 no-export">
-                <button onclick="saveJPG()" class="btn bg-white border border-gray-300 text-gray-600 hover:bg-gray-100">🖼️ JPG</button>
-                <button onclick="saveHTML()" class="btn bg-blue-600 text-white hover:bg-blue-700">📄 Guardar Datos</button>
             </div>
         </header>
 
@@ -51,22 +72,21 @@
                 <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-500">
                     <h2 class="text-xl font-bold mb-4 flex items-center">📦 Inversión inicial</h2>
                     <div class="space-y-2">
-                        <div class="input-group"><span>Precio Compra inmueble </span><input type="number" id="precio" value="110000" class="bg-blue-50 border-blue-100"></div>
-                        <div class="input-group"><span>Gastos (ITP, Notaría)</span><input type="number" id="gastosCompra" value="12400" class="bg-red-50 border-red-100"></div>
-                        <div class="input-group"><span>Reforma / Mobiliario</span><input type="number" id="reforma" value="20000" class="bg-red-50 border-red-100"></div>
-						<div class="input-group"><span> Financiado hipoteca (%)  </span><input type="number" id="pctFin" value="80" class="bg-green-50 border-green-100"></div>
+                        <div class="input-group"><span>Precio Compra</span><div class="input-wrapper"><input type="number" id="precio" value="110000" class="bg-blue-50"></div></div>
+                        <div class="input-group"><span>Gastos (ITP, Notaría)</span><div class="input-wrapper"><input type="number" id="gastosCompra" value="12400" class="bg-red-50"></div></div>
+                        <div class="input-group"><span>Reforma / Mobiliario</span><div class="input-wrapper"><input type="number" id="reforma" value="20000" class="bg-red-50"></div></div>
+						<div class="input-group"><span>Financiado (%)</span><div class="input-wrapper no-euro"><input type="number" id="pctFin" value="80" class="bg-green-50" style="padding-right: 0.25rem !important;"></div></div>
                         <hr>
-                        <div class="input-group font-bold text-gray-700"><span>Total Inversión </span><span id="totalInv">0 €</span></div>
-                        
-                        <div class="input-group text-blue-700 font-bold"><span>Banco (Deuda) </span><span id="montoHipoteca">0 €</span></div>
-                        <div class="input-group text-orange-700 font-bold"><span>Capital Propio </span><span id="capitalPropio">0 €</span></div>
+                        <div class="input-group font-bold text-gray-700"><span>Total Inversión</span><span id="totalInv">0 €</span></div>
+                        <div class="input-group text-blue-700 font-bold"><span>Banco (Deuda)</span><span id="montoHipoteca">0 €</span></div>
+                        <div class="input-group text-orange-700 font-bold"><span>Capital Propio</span><span id="capitalPropio">0 €</span></div>
                     </div>
 
                     <h2 class="text-xl font-bold mt-8 mb-4 flex items-center">🏦 Financiación</h2>
                     <div class="space-y-2">
-                        <div class="input-group"><span>Interés (%) </span><input type="number" step="0.1" id="interes" value="2.5" class="bg-green-50 border-green-100"></div>
-                        <div class="input-group"><span>Plazo (años) </span><input type="number" id="plazo" value="30" class="bg-green-50 border-green-100"></div>
-                        <div class="input-group font-bold text-red-600 items-center"><span>Cuota Mensual </span><span id="cuota">0 €</span></div>
+                        <div class="input-group"><span>Interés (%)</span><div class="input-wrapper no-euro"><input type="number" step="0.1" id="interes" value="2.5" class="bg-green-50" style="padding-right: 0.25rem !important;"></div></div>
+                        <div class="input-group"><span>Plazo (años)</span><div class="input-wrapper no-euro"><input type="number" id="plazo" value="30" class="bg-green-50" style="padding-right: 0.25rem !important;"></div></div>
+                        <div class="input-group font-bold text-red-600"><span>Cuota Mensual</span><span id="cuota">0 €</span></div>
                     </div>
                 </div>
             </div>
@@ -75,21 +95,21 @@
                 <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-green-500">
                     <h2 class="text-xl font-bold mb-4 text-green-600">💰 Ingresos</h2>
                     <div class="input-group font-bold text-green-600 border-none">
-                        <span>Alquiler Mensual Bruto </span>
-                        <input type="number" id="alquiler" value="1100" class="bg-green-50 border-green-200">
+                        <span>Alquiler Mensual Bruto</span>
+                        <div class="input-wrapper"><input type="number" id="alquiler" value="1100" class="bg-green-50 border-green-200"></div>
                     </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-red-500">
                     <h2 class="text-xl font-bold mb-4 text-red-600">📉 Gastos Mensuales</h2>
                     <div class="space-y-2">
-                        <div class="input-group font-bold text-red-500"><span>Cuota mensual  </span><span id="cuotaGasto">0 €</span></div>
-                        <div class="input-group"><span>Comunidad, IBI, Seguros </span><input type="number" id="gastosFijos" value="120" class="bg-red-50 border-red-100"></div>
-                        <div class="input-group"><span>Suministros (WiFi, Luz...) </span><input type="number" id="suministros" value="120" class="bg-red-50 border-red-100"></div>
-                        <div class="input-group"><span>Gestión Habitaciones </span><input type="number" id="gestion" value="100" class="bg-red-50 border-red-100"></div>
-                        <div class="input-group"><span>Limpieza vivienda inmueble </span><input type="number" id="limpieza" value="120" class="bg-red-50 border-red-100"></div>
+                        <div class="input-group font-bold text-red-500"><span>Cuota mensual</span><span id="cuotaGasto">0 €</span></div>
+                        <div class="input-group"><span>Comunidad, IBI, Seguros</span><div class="input-wrapper"><input type="number" id="gastosFijos" value="120" class="bg-red-50"></div></div>
+                        <div class="input-group"><span>Suministros (WiFi, Luz...)</span><div class="input-wrapper"><input type="number" id="suministros" value="120" class="bg-red-50"></div></div>
+                        <div class="input-group"><span>Gestión Habitaciones</span><div class="input-wrapper"><input type="number" id="gestion" value="100" class="bg-red-50"></div></div>
+                        <div class="input-group"><span>Limpieza vivienda</span><div class="input-wrapper"><input type="number" id="limpieza" value="120" class="bg-red-50"></div></div>
                         <hr>
-                        <div class="input-group font-black text-red-600 text-lg"><span>TOTAL GASTOS </span><span id="totalGastos">0 €</span></div>
+                        <div class="input-group font-black text-red-600 text-lg"><span>TOTAL GASTOS</span><span id="totalGastos">0 €</span></div>
                     </div>
                 </div>
             </div>
@@ -98,17 +118,19 @@
                 <div class="metric-card border-blue-600">
                     <p class="text-sm uppercase text-gray-500">Cashflow Neto Mensual</p>
                     <h3 class="text-4xl font-black" id="cashflow">0 €</h3>
-                    <p class="text-xs text-gray-400 mt-1">Beneficio real tras todo</p>
+                    <p class="text-xs text-gray-400 mt-1">Meta: > 400€</p>
                 </div>
 
                 <div class="metric-card border-yellow-500">
                     <p class="text-sm uppercase text-gray-500">Cash on Cash (CoC)</p>
                     <h3 class="text-3xl font-black" id="coc">0 %</h3>
+                    <p class="text-xs text-gray-400 mt-1">Meta: > 12%</p>
                 </div>
 
                 <div class="metric-card border-purple-600">
                     <p class="text-sm uppercase text-gray-500">Rentabilidad Bruta</p>
                     <h3 class="text-3xl font-black" id="rentBruta">0 %</h3>
+                    <p class="text-xs text-gray-400 mt-1">Meta: > 10%</p>
                 </div>
 
                 <div class="metric-card border-orange-600">
@@ -118,47 +140,42 @@
             </div>
         </div>
     </div>
+<div class="flex justify-center gap-4 mt-12 no-export">
+            <button onclick="saveJPG()" class="btn bg-blue-600 text-white hover:bg-blue-700 text-lg py-3 px-6">🖼️ Descargar Imagen (JPG)</button>
+        </div>
+    </div> ```
 
     <script>
         function calcular() {
-            // Inputs
             const precio = parseFloat(document.getElementById('precio').value) || 0;
             const gastosCompra = parseFloat(document.getElementById('gastosCompra').value) || 0;
             const reforma = parseFloat(document.getElementById('reforma').value) || 0;
             const pctFin = (parseFloat(document.getElementById('pctFin').value) || 0) / 100;
-            
             const alquiler = parseFloat(document.getElementById('alquiler').value) || 0;
             const gastosFijos = parseFloat(document.getElementById('gastosFijos').value) || 0;
             const suministros = parseFloat(document.getElementById('suministros').value) || 0;
             const gestion = parseFloat(document.getElementById('gestion').value) || 0;
             const limpieza = parseFloat(document.getElementById('limpieza').value) || 0;
-
             const interesAnual = (parseFloat(document.getElementById('interes').value) || 0) / 100;
             const plazoAnios = parseFloat(document.getElementById('plazo').value) || 1;
 
-            // Lógica Inversión
             const totalInversion = precio + gastosCompra + reforma;
             const montoHipoteca = precio * pctFin;
             const capitalPropio = totalInversion - montoHipoteca;
 
-            // Lógica Hipoteca (Francesa)
             const i = interesAnual / 12;
             const n = plazoAnios * 12;
             let cuota = (i > 0) ? montoHipoteca * ((i * Math.pow(1+i, n)) / (Math.pow(1+i, n) - 1)) : montoHipoteca / n;
 
-            // Gastos y Flujo
             const gastosOperativos = cuota + gastosFijos + suministros + gestion + limpieza;
             const cashflow = alquiler - gastosOperativos;
 
-            // Métricas
             const coc = (capitalPropio > 0) ? ((cashflow * 12) / capitalPropio) * 100 : 0;
             const rentBruta = (precio > 0) ? ((alquiler * 12) / precio) * 100 : 0;
             const payback = (cashflow > 0) ? capitalPropio / (cashflow * 12) : 0;
 
-            // Formateador europeo
             const fmt = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-            // Renderizado
             document.getElementById('totalInv').innerText = fmt.format(totalInversion) + " €";
             document.getElementById('montoHipoteca').innerText = fmt.format(montoHipoteca) + " €";
             document.getElementById('capitalPropio').innerText = fmt.format(capitalPropio) + " €";
@@ -171,11 +188,29 @@
             document.getElementById('rentBruta').innerText = fmt.format(rentBruta) + " %";
             document.getElementById('payback').innerText = payback.toFixed(1) + " años";
 
-            // Semáforo
-            document.getElementById('cashflow').className = cashflow > 250 ? "text-4xl font-black good" : "text-4xl font-black bad";
+			// Semáforos condicionales (El número cambia a verde si cumple objetivos)
+			// Objetivo Cashflow: 400€
+			const cashflowElement = document.getElementById('cashflow');
+			cashflowElement.innerText = fmt.format(cashflow) + " €";
+			cashflowElement.className = cashflow >= 400 
+				? "text-4xl font-black text-green-600" 
+				: "text-4xl font-black text-red-600";
+
+			// Objetivo Cash on Cash: 12%
+			const cocElement = document.getElementById('coc');
+			cocElement.innerText = fmt.format(coc) + " %";
+			cocElement.className = coc >= 12 
+				? "text-3xl font-black text-green-600" 
+				: "text-3xl font-black text-red-600";
+
+			// Objetivo Rentabilidad Bruta: 10%
+			const rentBrutaElement = document.getElementById('rentBruta');
+			rentBrutaElement.innerText = fmt.format(rentBruta) + " %";
+			rentBrutaElement.className = rentBruta >= 10 
+				? "text-3xl font-black text-green-600" 
+				: "text-3xl font-black text-red-600";
         }
 
-        // --- Funciones de guardado ---
         function saveJPG() {
             const btns = document.querySelector('.no-export');
             btns.style.opacity = '0';
