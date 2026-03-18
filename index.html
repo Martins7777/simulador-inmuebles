@@ -72,9 +72,9 @@
                 <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-500">
                     <h2 class="text-xl font-bold mb-4 flex items-center">📦 Inversión inicial</h2>
                     <div class="space-y-2">
-                        <div class="input-group"><span>Precio Compra</span><div class="input-wrapper"><input type="number" id="precio" value="110000" class="bg-blue-50"></div></div>
-                        <div class="input-group"><span>Gastos (ITP, Notaría)</span><div class="input-wrapper"><input type="number" id="gastosCompra" value="12400" class="bg-red-50"></div></div>
-                        <div class="input-group"><span>Reforma / Mobiliario</span><div class="input-wrapper"><input type="number" id="reforma" value="20000" class="bg-red-50"></div></div>
+                        <div class="input-group"><span>Precio Compra</span><div class="input-wrapper"><input type="number" id="precio" value="120000" class="bg-blue-50"></div></div>
+                        <div class="input-group"><span>Gastos (ITP, Notaría)</span><div class="input-wrapper"><input type="number" id="gastosCompra" value="13400" class="bg-red-50"></div></div>
+                        <div class="input-group"><span>Reforma / Mobiliario</span><div class="input-wrapper"><input type="number" id="reforma" value="1500" class="bg-red-50"></div></div>
 						<div class="input-group"><span>Financiado (%)</span><div class="input-wrapper no-euro"><input type="number" id="pctFin" value="80" class="bg-green-50" style="padding-right: 0.25rem !important;"></div></div>
                         <hr>
                         <div class="input-group font-bold text-gray-700"><span>Total Inversión</span><span id="totalInv">0 €</span></div>
@@ -96,7 +96,7 @@
                     <h2 class="text-xl font-bold mb-4 text-green-600">💰 Ingresos</h2>
                     <div class="input-group font-bold text-green-600 border-none">
                         <span>Alquiler Mensual Bruto</span>
-                        <div class="input-wrapper"><input type="number" id="alquiler" value="1100" class="bg-green-50 border-green-200"></div>
+                        <div class="input-wrapper"><input type="number" id="alquiler" value="850" class="bg-green-50 border-green-200"></div>
                     </div>
                 </div>
 
@@ -104,10 +104,12 @@
                     <h2 class="text-xl font-bold mb-4 text-red-600">📉 Gastos Mensuales</h2>
                     <div class="space-y-2">
                         <div class="input-group font-bold text-red-500"><span>Cuota mensual</span><span id="cuotaGasto">0 €</span></div>
-                        <div class="input-group"><span>Comunidad, IBI, Seguros</span><div class="input-wrapper"><input type="number" id="gastosFijos" value="120" class="bg-red-50"></div></div>
-                        <div class="input-group"><span>Suministros (WiFi, Luz...)</span><div class="input-wrapper"><input type="number" id="suministros" value="120" class="bg-red-50"></div></div>
-                        <div class="input-group"><span>Gestión Habitaciones</span><div class="input-wrapper"><input type="number" id="gestion" value="100" class="bg-red-50"></div></div>
-                        <div class="input-group"><span>Limpieza vivienda</span><div class="input-wrapper"><input type="number" id="limpieza" value="120" class="bg-red-50"></div></div>
+                        <div class="input-group"><span>Comunidad, IBI </span><div class="input-wrapper"><input type="number" id="gastosCasa" value="50" class="bg-red-50"></div></div>
+						<div class="input-group"><span>Seguros (casa,impago..)</span><div class="input-wrapper"><input type="number" id="gastosSeguros" value="50" class="bg-red-50"></div></div>
+						<div class="input-group"><span>Manten/Vacío (8% ingresos)</span><span id="gastosManten" class="text-red-500 font-bold">0 €</span></div>
+                        <div class="input-group"><span>Suministros (WiFi, Luz..)</span><div class="input-wrapper"><input type="number" id="suministros" value="0" class="bg-red-50"></div></div>
+                        <div class="input-group"><span>Gestión Habitaciones</span><div class="input-wrapper"><input type="number" id="gestion" value="0" class="bg-red-50"></div></div>
+                        <div class="input-group"><span>Limpieza vivienda</span><div class="input-wrapper"><input type="number" id="limpieza" value="0" class="bg-red-50"></div></div>
                         <hr>
                         <div class="input-group font-black text-red-600 text-lg"><span>TOTAL GASTOS</span><span id="totalGastos">0 €</span></div>
                     </div>
@@ -152,7 +154,9 @@
             const reforma = parseFloat(document.getElementById('reforma').value) || 0;
             const pctFin = (parseFloat(document.getElementById('pctFin').value) || 0) / 100;
             const alquiler = parseFloat(document.getElementById('alquiler').value) || 0;
-            const gastosFijos = parseFloat(document.getElementById('gastosFijos').value) || 0;
+            const gastosCasa = parseFloat(document.getElementById('gastosCasa').value) || 0;
+			const gastosSeguros = parseFloat(document.getElementById('gastosSeguros').value) || 0;
+			const gastosManten = alquiler * 0.08;
             const suministros = parseFloat(document.getElementById('suministros').value) || 0;
             const gestion = parseFloat(document.getElementById('gestion').value) || 0;
             const limpieza = parseFloat(document.getElementById('limpieza').value) || 0;
@@ -167,7 +171,7 @@
             const n = plazoAnios * 12;
             let cuota = (i > 0) ? montoHipoteca * ((i * Math.pow(1+i, n)) / (Math.pow(1+i, n) - 1)) : montoHipoteca / n;
 
-            const gastosOperativos = cuota + gastosFijos + suministros + gestion + limpieza;
+            const gastosOperativos = cuota + gastosCasa + gastosSeguros + gastosManten + suministros + gestion + limpieza;
             const cashflow = alquiler - gastosOperativos;
 
             const coc = (capitalPropio > 0) ? ((cashflow * 12) / capitalPropio) * 100 : 0;
@@ -182,6 +186,7 @@
             document.getElementById('cuota').innerText = fmt.format(cuota) + " €";
             document.getElementById('cuotaGasto').innerText = fmt.format(cuota) + " €";
             document.getElementById('totalGastos').innerText = fmt.format(gastosOperativos) + " €";
+            document.getElementById('gastosManten').innerText = fmt.format(gastosManten) + " €";
             
             document.getElementById('cashflow').innerText = fmt.format(cashflow) + " €";
             document.getElementById('coc').innerText = fmt.format(coc) + " %";
@@ -214,10 +219,53 @@
         function saveJPG() {
             const btns = document.querySelector('.no-export');
             btns.style.opacity = '0';
-            html2canvas(document.querySelector("#capture-area")).then(canvas => {
+
+            // Sustituir inputs por spans para que html2canvas muestre el valor completo
+            const captureArea = document.querySelector("#capture-area");
+            const inputs = captureArea.querySelectorAll('input');
+            const replacements = [];
+
+            inputs.forEach(input => {
+                const span = document.createElement('span');
+                span.textContent = input.value;
+                // Copiar estilos visuales relevantes
+                const cs = window.getComputedStyle(input);
+                span.style.cssText = `
+                    display: inline-block;
+                    width: ${cs.width};
+                    text-align: center;
+                    font-size: ${cs.fontSize};
+                    font-family: ${cs.fontFamily};
+                    font-weight: ${cs.fontWeight};
+                    color: ${cs.color};
+                    background-color: ${cs.backgroundColor};
+                    border: ${cs.border};
+                    border-radius: ${cs.borderRadius};
+                    padding: 0.25rem 0.25rem;
+                    box-sizing: border-box;
+                `;
+                replacements.push({ input, parent: input.parentNode, next: input.nextSibling, wrapper: input.closest('.input-wrapper') });
+                if (input.closest('.input-wrapper')) {
+                    input.closest('.input-wrapper').replaceChild(span, input);
+                } else {
+                    input.parentNode.replaceChild(span, input);
+                }
+                replacements[replacements.length - 1].span = span;
+            });
+
+            html2canvas(captureArea, { scale: 2, useCORS: true }).then(canvas => {
+                // Restaurar inputs originales
+                replacements.forEach(({ input, span, wrapper, parent, next }) => {
+                    if (wrapper && wrapper.contains(span)) {
+                        wrapper.replaceChild(input, span);
+                    } else if (parent && parent.contains(span)) {
+                        parent.replaceChild(input, span);
+                    }
+                });
+
                 const link = document.createElement('a');
                 link.download = `${document.getElementById('nombreInmueble').value}.jpg`;
-                link.href = canvas.toDataURL("image/jpeg", 0.9);
+                link.href = canvas.toDataURL("image/jpeg", 0.95);
                 link.click();
                 btns.style.opacity = '1';
             });
