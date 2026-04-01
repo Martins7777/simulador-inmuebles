@@ -7,11 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        .input-group { 
-            display: flex !important; 
-            justify-content: space-between !important; 
-            align-items: center !important; 
-            margin-bottom: 0.5rem; 
+        .input-group {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-bottom: 0.5rem;
             border-bottom: 1px solid #f8fafc;
         }
 
@@ -31,15 +31,15 @@
         /* Clase especial para quitar el € en el porcentaje */
         .no-euro::after { content: "" !important; }
 
-        input { 
-            width: 5rem !important; 
-            text-align: center !important; 
+        input {
+            width: 5rem !important;
+            text-align: center !important;
             background-color: #f9fafb;
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             padding: 0.25rem 1.2rem 0.25rem 0.25rem; /* Espacio extra a la derecha para el € */
         }
-        
+
         /* Estilo para el título más grande */
         #nombreInmueble {
             width: 800px !important; /* Caja mucho más grande */
@@ -54,6 +54,33 @@
         .bad { @apply text-red-600 font-bold; }
         .good { @apply text-green-600 font-bold; }
         .btn { @apply px-4 py-2 rounded-lg font-bold text-xs transition-all active:scale-95 flex items-center gap-2; }
+
+        /* Stepper buttons */
+        .stepper-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .stepper-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #d1d5db;
+            background: #f3f4f6;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            color: #374151;
+            flex-shrink: 0;
+            padding: 0;
+            user-select: none;
+        }
+        .stepper-btn:hover { background: #e5e7eb; }
+        .stepper-btn:active { transform: scale(0.85); }
     </style>
 </head>
 <body class="bg-slate-50 p-6 font-sans">
@@ -67,15 +94,43 @@
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
+
             <div class="space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-500">
                     <h2 class="text-xl font-bold mb-4 flex items-center">📦 Inversión inicial</h2>
                     <div class="space-y-2">
-                        <div class="input-group"><span>Precio Compra</span><div class="input-wrapper"><input type="number" id="precio" value="120000" class="bg-blue-50"></div></div>
-                        <div class="input-group"><span>Gastos (ITP, Notaría)</span><div class="input-wrapper"><input type="number" id="gastosCompra" value="13400" class="bg-red-50"></div></div>
-                        <div class="input-group"><span>Reforma / Mobiliario</span><div class="input-wrapper"><input type="number" id="reforma" value="1500" class="bg-red-50"></div></div>
-						<div class="input-group"><span>Financiado (%)</span><div class="input-wrapper no-euro"><input type="number" id="pctFin" value="80" class="bg-green-50" style="padding-right: 0.25rem !important;"></div></div>
+                        <div class="input-group">
+                            <span>Precio Compra</span>
+                            <div class="stepper-wrapper">
+                                <button class="stepper-btn" onclick="step('precio',-10000)">−</button>
+                                <div class="input-wrapper"><input type="number" id="precio" value="120000" class="bg-blue-50"></div>
+                                <button class="stepper-btn" onclick="step('precio',10000)">+</button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <span>Gastos (ITP, Notaría)</span>
+                            <div class="stepper-wrapper">
+                                <button class="stepper-btn" onclick="step('gastosCompra',-1000)">−</button>
+                                <div class="input-wrapper"><input type="number" id="gastosCompra" value="13400" class="bg-red-50"></div>
+                                <button class="stepper-btn" onclick="step('gastosCompra',1000)">+</button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <span>Reforma / Mobiliario</span>
+                            <div class="stepper-wrapper">
+                                <button class="stepper-btn" onclick="step('reforma',-1000)">−</button>
+                                <div class="input-wrapper"><input type="number" id="reforma" value="1500" class="bg-red-50"></div>
+                                <button class="stepper-btn" onclick="step('reforma',1000)">+</button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <span>Financiado (%)</span>
+                            <div class="stepper-wrapper">
+                                <button class="stepper-btn" onclick="step('pctFin',-5)">−</button>
+                                <div class="input-wrapper no-euro"><input type="number" id="pctFin" value="80" class="bg-green-50" style="padding-right: 0.25rem !important;"></div>
+                                <button class="stepper-btn" onclick="step('pctFin',5)">+</button>
+                            </div>
+                        </div>
                         <hr>
                         <div class="input-group font-bold text-gray-700"><span>Total Inversión</span><span id="totalInv">0 €</span></div>
                         <div class="input-group text-blue-700 font-bold"><span>Banco (Deuda)</span><span id="montoHipoteca">0 €</span></div>
@@ -84,8 +139,22 @@
 
                     <h2 class="text-xl font-bold mt-8 mb-4 flex items-center">🏦 Financiación</h2>
                     <div class="space-y-2">
-                        <div class="input-group"><span>Interés (%)</span><div class="input-wrapper no-euro"><input type="number" step="0.1" id="interes" value="2.5" class="bg-green-50" style="padding-right: 0.25rem !important;"></div></div>
-                        <div class="input-group"><span>Plazo (años)</span><div class="input-wrapper no-euro"><input type="number" id="plazo" value="30" class="bg-green-50" style="padding-right: 0.25rem !important;"></div></div>
+                        <div class="input-group">
+                            <span>Interés (%)</span>
+                            <div class="stepper-wrapper">
+                                <button class="stepper-btn" onclick="step('interes',-0.5)">−</button>
+                                <div class="input-wrapper no-euro"><input type="number" step="0.1" id="interes" value="2.5" class="bg-green-50" style="padding-right: 0.25rem !important;"></div>
+                                <button class="stepper-btn" onclick="step('interes',0.5)">+</button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <span>Plazo (años)</span>
+                            <div class="stepper-wrapper">
+                                <button class="stepper-btn" onclick="step('plazo',-5)">−</button>
+                                <div class="input-wrapper no-euro"><input type="number" id="plazo" value="30" class="bg-green-50" style="padding-right: 0.25rem !important;"></div>
+                                <button class="stepper-btn" onclick="step('plazo',5)">+</button>
+                            </div>
+                        </div>
                         <div class="input-group font-bold text-red-600"><span>Cuota Mensual</span><span id="cuota">0 €</span></div>
                     </div>
                 </div>
@@ -96,7 +165,11 @@
                     <h2 class="text-xl font-bold mb-4 text-green-600">💰 Ingresos</h2>
                     <div class="input-group font-bold text-green-600 border-none">
                         <span>Alquiler Mensual Bruto</span>
-                        <div class="input-wrapper"><input type="number" id="alquiler" value="850" class="bg-green-50 border-green-200"></div>
+                        <div class="stepper-wrapper">
+                            <button class="stepper-btn" onclick="step('alquiler',-50)">−</button>
+                            <div class="input-wrapper"><input type="number" id="alquiler" value="850" class="bg-green-50 border-green-200"></div>
+                            <button class="stepper-btn" onclick="step('alquiler',50)">+</button>
+                        </div>
                     </div>
                 </div>
 
@@ -104,12 +177,47 @@
                     <h2 class="text-xl font-bold mb-4 text-red-600">📉 Gastos Mensuales</h2>
                     <div class="space-y-2">
                         <div class="input-group font-bold text-red-500"><span>Cuota mensual</span><span id="cuotaGasto">0 €</span></div>
-                        <div class="input-group"><span>Comunidad, IBI </span><div class="input-wrapper"><input type="number" id="gastosCasa" value="50" class="bg-red-50"></div></div>
-						<div class="input-group"><span>Seguros (casa,impago..)</span><div class="input-wrapper"><input type="number" id="gastosSeguros" value="50" class="bg-red-50"></div></div>
-						<div class="input-group"><span>Manten/Vacío (8% ingresos)</span><span id="gastosManten" class="text-red-500 font-bold">0 €</span></div>
-                        <div class="input-group"><span>Suministros (WiFi, Luz..)</span><div class="input-wrapper"><input type="number" id="suministros" value="0" class="bg-red-50"></div></div>
-                        <div class="input-group"><span>Gestión Habitaciones</span><div class="input-wrapper"><input type="number" id="gestion" value="0" class="bg-red-50"></div></div>
-                        <div class="input-group"><span>Limpieza vivienda</span><div class="input-wrapper"><input type="number" id="limpieza" value="0" class="bg-red-50"></div></div>
+                        <div class="input-group">
+                            <span>Comunidad, IBI </span>
+                            <div class="stepper-wrapper">
+                                <button class="stepper-btn" onclick="step('gastosCasa',-50)">−</button>
+                                <div class="input-wrapper"><input type="number" id="gastosCasa" value="50" class="bg-red-50"></div>
+                                <button class="stepper-btn" onclick="step('gastosCasa',50)">+</button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <span>Seguros (casa,impago..)</span>
+                            <div class="stepper-wrapper">
+                                <button class="stepper-btn" onclick="step('gastosSeguros',-50)">−</button>
+                                <div class="input-wrapper"><input type="number" id="gastosSeguros" value="50" class="bg-red-50"></div>
+                                <button class="stepper-btn" onclick="step('gastosSeguros',50)">+</button>
+                            </div>
+                        </div>
+                        <div class="input-group"><span>Manten/Vacío (8% ingresos)</span><span id="gastosManten" class="text-red-500 font-bold">0 €</span></div>
+                        <div class="input-group">
+                            <span>Suministros (WiFi, Luz..)</span>
+                            <div class="stepper-wrapper">
+                                <button class="stepper-btn" onclick="step('suministros',-50)">−</button>
+                                <div class="input-wrapper"><input type="number" id="suministros" value="0" class="bg-red-50"></div>
+                                <button class="stepper-btn" onclick="step('suministros',50)">+</button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <span>Gestión Habitaciones</span>
+                            <div class="stepper-wrapper">
+                                <button class="stepper-btn" onclick="step('gestion',-50)">−</button>
+                                <div class="input-wrapper"><input type="number" id="gestion" value="0" class="bg-red-50"></div>
+                                <button class="stepper-btn" onclick="step('gestion',50)">+</button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <span>Limpieza vivienda</span>
+                            <div class="stepper-wrapper">
+                                <button class="stepper-btn" onclick="step('limpieza',-50)">−</button>
+                                <div class="input-wrapper"><input type="number" id="limpieza" value="0" class="bg-red-50"></div>
+                                <button class="stepper-btn" onclick="step('limpieza',50)">+</button>
+                            </div>
+                        </div>
                         <hr>
                         <div class="input-group font-black text-red-600 text-lg"><span>TOTAL GASTOS</span><span id="totalGastos">0 €</span></div>
                     </div>
@@ -142,10 +250,9 @@
             </div>
         </div>
     </div>
-<div class="flex justify-center gap-4 mt-12 no-export">
-            <button onclick="saveJPG()" class="btn bg-blue-600 text-white hover:bg-blue-700 text-lg py-3 px-6">🖼️ Descargar Imagen (JPG)</button>
-        </div>
-    </div> ```
+    <div class="flex justify-center gap-4 mt-12 no-export">
+        <button onclick="saveJPG()" class="btn bg-blue-600 text-white hover:bg-blue-700 text-lg py-3 px-6">🖼️ Descargar Imagen (JPG)</button>
+    </div>
 
     <script>
         function calcular() {
@@ -155,8 +262,8 @@
             const pctFin = (parseFloat(document.getElementById('pctFin').value) || 0) / 100;
             const alquiler = parseFloat(document.getElementById('alquiler').value) || 0;
             const gastosCasa = parseFloat(document.getElementById('gastosCasa').value) || 0;
-			const gastosSeguros = parseFloat(document.getElementById('gastosSeguros').value) || 0;
-			const gastosManten = alquiler * 0.08;
+            const gastosSeguros = parseFloat(document.getElementById('gastosSeguros').value) || 0;
+            const gastosManten = alquiler * 0.08;
             const suministros = parseFloat(document.getElementById('suministros').value) || 0;
             const gestion = parseFloat(document.getElementById('gestion').value) || 0;
             const limpieza = parseFloat(document.getElementById('limpieza').value) || 0;
@@ -187,38 +294,49 @@
             document.getElementById('cuotaGasto').innerText = fmt.format(cuota) + " €";
             document.getElementById('totalGastos').innerText = fmt.format(gastosOperativos) + " €";
             document.getElementById('gastosManten').innerText = fmt.format(gastosManten) + " €";
-            
+
             document.getElementById('cashflow').innerText = fmt.format(cashflow) + " €";
             document.getElementById('coc').innerText = fmt.format(coc) + " %";
             document.getElementById('rentBruta').innerText = fmt.format(rentBruta) + " %";
             document.getElementById('payback').innerText = payback.toFixed(1) + " años";
 
-			// Semáforos condicionales (El número cambia a verde si cumple objetivos)
-			// Objetivo Cashflow: 400€
-			const cashflowElement = document.getElementById('cashflow');
-			cashflowElement.innerText = fmt.format(cashflow) + " €";
-			cashflowElement.className = cashflow >= 400 
-				? "text-4xl font-black text-green-600" 
-				: "text-4xl font-black text-red-600";
+            // Semáforos condicionales (El número cambia a verde si cumple objetivos)
+            // Objetivo Cashflow: 400€
+            const cashflowElement = document.getElementById('cashflow');
+            cashflowElement.innerText = fmt.format(cashflow) + " €";
+            cashflowElement.className = cashflow >= 400
+                ? "text-4xl font-black text-green-600"
+                : "text-4xl font-black text-red-600";
 
-			// Objetivo Cash on Cash: 12%
-			const cocElement = document.getElementById('coc');
-			cocElement.innerText = fmt.format(coc) + " %";
-			cocElement.className = coc >= 12 
-				? "text-3xl font-black text-green-600" 
-				: "text-3xl font-black text-red-600";
+            // Objetivo Cash on Cash: 12%
+            const cocElement = document.getElementById('coc');
+            cocElement.innerText = fmt.format(coc) + " %";
+            cocElement.className = coc >= 12
+                ? "text-3xl font-black text-green-600"
+                : "text-3xl font-black text-red-600";
 
-			// Objetivo Rentabilidad Bruta: 10%
-			const rentBrutaElement = document.getElementById('rentBruta');
-			rentBrutaElement.innerText = fmt.format(rentBruta) + " %";
-			rentBrutaElement.className = rentBruta >= 10 
-				? "text-3xl font-black text-green-600" 
-				: "text-3xl font-black text-red-600";
+            // Objetivo Rentabilidad Bruta: 10%
+            const rentBrutaElement = document.getElementById('rentBruta');
+            rentBrutaElement.innerText = fmt.format(rentBruta) + " %";
+            rentBrutaElement.className = rentBruta >= 10
+                ? "text-3xl font-black text-green-600"
+                : "text-3xl font-black text-red-600";
+        }
+
+        function step(id, delta) {
+            const input = document.getElementById(id);
+            const val = parseFloat(input.value) || 0;
+            input.value = Math.round((val + delta) * 100) / 100;
+            calcular();
         }
 
         function saveJPG() {
             const btns = document.querySelector('.no-export');
             btns.style.opacity = '0';
+
+            // Ocultar steppers en la captura
+            const stepperBtns = document.querySelectorAll('.stepper-btn');
+            stepperBtns.forEach(btn => btn.style.visibility = 'hidden');
 
             // Sustituir inputs por spans para que html2canvas muestre el valor completo
             const captureArea = document.querySelector("#capture-area");
@@ -262,6 +380,9 @@
                         parent.replaceChild(input, span);
                     }
                 });
+
+                // Restaurar steppers
+                stepperBtns.forEach(btn => btn.style.visibility = '');
 
                 const link = document.createElement('a');
                 link.download = `${document.getElementById('nombreInmueble').value}.jpg`;
