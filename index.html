@@ -338,58 +338,86 @@
             const stepperBtns = document.querySelectorAll('.stepper-btn');
             stepperBtns.forEach(btn => btn.style.visibility = 'hidden');
 
-            // Sustituir inputs por spans para que html2canvas muestre el valor completo
-            const captureArea = document.querySelector("#capture-area");
-            const inputs = captureArea.querySelectorAll('input');
-            const replacements = [];
-
-            inputs.forEach(input => {
-                const span = document.createElement('span');
-                span.textContent = input.value;
-                // Copiar estilos visuales relevantes
-                const cs = window.getComputedStyle(input);
-                span.style.cssText = `
-                    display: inline-block;
-                    width: ${cs.width};
-                    text-align: center;
-                    font-size: ${cs.fontSize};
-                    font-family: ${cs.fontFamily};
-                    font-weight: ${cs.fontWeight};
-                    color: ${cs.color};
-                    background-color: ${cs.backgroundColor};
-                    border: ${cs.border};
-                    border-radius: ${cs.borderRadius};
-                    padding: 0.25rem 0.25rem;
-                    box-sizing: border-box;
-                `;
-                replacements.push({ input, parent: input.parentNode, next: input.nextSibling, wrapper: input.closest('.input-wrapper') });
-                if (input.closest('.input-wrapper')) {
-                    input.closest('.input-wrapper').replaceChild(span, input);
-                } else {
-                    input.parentNode.replaceChild(span, input);
+            // Forzar layout de escritorio (3 columnas) independientemente del tamaño de pantalla
+            const overrideStyle = document.createElement('style');
+            overrideStyle.id = 'capture-override';
+            overrideStyle.textContent = `
+                #capture-area {
+                    width: 1152px !important;
+                    max-width: none !important;
+                    padding: 1.5rem !important;
                 }
-                replacements[replacements.length - 1].span = span;
-            });
+                #capture-area .grid {
+                    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                }
+                #nombreInmueble {
+                    width: 700px !important;
+                }
+            `;
+            document.head.appendChild(overrideStyle);
 
-            html2canvas(captureArea, { scale: 2, useCORS: true }).then(canvas => {
-                // Restaurar inputs originales
-                replacements.forEach(({ input, span, wrapper, parent, next }) => {
-                    if (wrapper && wrapper.contains(span)) {
-                        wrapper.replaceChild(input, span);
-                    } else if (parent && parent.contains(span)) {
-                        parent.replaceChild(input, span);
+            // Pequeña pausa para que los estilos se apliquen antes de capturar
+            setTimeout(() => {
+                // Sustituir inputs por spans para que html2canvas muestre el valor completo
+                const captureArea = document.querySelector("#capture-area");
+                const inputs = captureArea.querySelectorAll('input');
+                const replacements = [];
+
+                inputs.forEach(input => {
+                    const span = document.createElement('span');
+                    span.textContent = input.value;
+                    const cs = window.getComputedStyle(input);
+                    span.style.cssText = `
+                        display: inline-block;
+                        width: ${cs.width};
+                        text-align: center;
+                        font-size: ${cs.fontSize};
+                        font-family: ${cs.fontFamily};
+                        font-weight: ${cs.fontWeight};
+                        color: ${cs.color};
+                        background-color: ${cs.backgroundColor};
+                        border: ${cs.border};
+                        border-radius: ${cs.borderRadius};
+                        padding: 0.25rem 0.25rem;
+                        box-sizing: border-box;
+                    `;
+                    replacements.push({ input, parent: input.parentNode, wrapper: input.closest('.input-wrapper') });
+                    if (input.closest('.input-wrapper')) {
+                        input.closest('.input-wrapper').replaceChild(span, input);
+                    } else {
+                        input.parentNode.replaceChild(span, input);
                     }
+                    replacements[replacements.length - 1].span = span;
                 });
 
-                // Restaurar steppers
-                stepperBtns.forEach(btn => btn.style.visibility = '');
+                html2canvas(captureArea, {
+                    scale: 2,
+                    useCORS: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    width: captureArea.offsetWidth,
+                    height: captureArea.offsetHeight,
+                }).then(canvas => {
+                    // Restaurar inputs originales
+                    replacements.forEach(({ input, span, wrapper, parent }) => {
+                        if (wrapper && wrapper.contains(span)) {
+                            wrapper.replaceChild(input, span);
+                        } else if (parent && parent.contains(span)) {
+                            parent.replaceChild(input, span);
+                        }
+                    });
 
-                const link = document.createElement('a');
-                link.download = `${document.getElementById('nombreInmueble').value}.jpg`;
-                link.href = canvas.toDataURL("image/jpeg", 0.95);
-                link.click();
-                btns.style.opacity = '1';
-            });
+                    // Eliminar estilos de override y restaurar steppers
+                    document.getElementById('capture-override').remove();
+                    stepperBtns.forEach(btn => btn.style.visibility = '');
+
+                    const link = document.createElement('a');
+                    link.download = `${document.getElementById('nombreInmueble').value}.jpg`;
+                    link.href = canvas.toDataURL("image/jpeg", 0.95);
+                    link.click();
+                    btns.style.opacity = '1';
+                });
+            }, 150);
         }
 
         function saveHTML() {
